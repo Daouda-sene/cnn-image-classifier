@@ -1,20 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Image Classifier</title>
+    <meta charset="UTF-8">
+    <title>Intel Image Classification</title>
+
+    <!-- Lien vers le CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-    <h1>Intel Image Classification</h1>
+    <h1>🧠 Intel Image Classification</h1>
 
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" required>
-        <button type="submit">Predict</button>
-    </form>
+    <div class="container">
 
-    {% if prediction %}
-        <h2>Prediction: {{ prediction }}</h2>
-    {% endif %}
+        <form method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+
+            <!-- 🔽 Combo box (choix du modèle) -->
+            <label>Select Model:</label>
+            <select name="model">
+                <option value="model1">Model 1</option>
+                <option value="model2">Model 2</option>
+            </select>
+
+            <!-- 📤 Upload image -->
+            <label>Upload Image:</label>
+            <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+
+            <!-- 🖼 Preview -->
+            <img id="preview" src="" alt="Preview Image">
+
+            <!-- 🔘 Buttons -->
+            <button type="submit">Predict</button>
+            <button type="button" onclick="resetForm()">Reset</button>
+
+            <!-- ⏳ Loading -->
+            <p id="loading">⏳ Prediction in progress...</p>
+
+        </form>
+
+        <!-- 🖼 Image après envoi -->
+        {% if image_path %}
+            <img src="{{ image_path }}">
+        {% endif %}
+
+        <!-- 📊 Résultat -->
+        {% if prediction %}
+            <div class="result">
+                <p><b>Prediction:</b> {{ prediction }}</p>
+                <p><b>Confidence:</b> {{ confidence }}%</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- 🔧 Scripts -->
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function showLoading() {
+            document.getElementById("loading").style.display = "block";
+        }
+
+        function resetForm() {
+            document.getElementById("preview").src = "";
+            document.getElementById("loading").style.display = "none";
+            location.reload();
+        }
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+
+
+# modèles lourds
+*.pth
+*.h5
+*.keras
+
+# dataset
+data/
+seg_train/
+seg_test/
+
+# environnement
+venv/
+
+# fichiers inutiles
+__pycache__/
+*.pycgit rm -r --cached .
+git add .
+git commit -m "remove heavy files"
+
+# système
+.DS_Store

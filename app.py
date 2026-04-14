@@ -5,30 +5,44 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# classes du dataset Intel
 classes = ["buildings", "forest", "glacier", "mountain", "sea", "street"]
 
-# charger ton modèle
-model = tf.keras.models.load_model("daouda_model.keras")
+# ✅ Charger les bons modèles (.keras)
+models = {
+    "model1": tf.keras.models.load_model("model1.keras"),
+    "model2": tf.keras.models.load_model("model2.keras")
+}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     prediction = None
+    confidence = None
+    image_path = None
 
     if request.method == "POST":
         file = request.files["image"]
-        file.save("test.jpg")
+        model_name = request.form["model"]
+        model = models[model_name]
 
-        # traitement image
-        img = Image.open("test.jpg").resize((150,150))
+        print("Model choisi:", model_name)
+
+        image_path = "static/test.jpg"
+        file.save(image_path)
+
+        img = Image.open(image_path).resize((150,150))
         img = np.array(img)/255.0
         img = np.expand_dims(img, axis=0)
 
-        # prédiction
         pred = model.predict(img)
-        prediction = classes[np.argmax(pred)]
+        class_index = np.argmax(pred)
 
-    return render_template("index.html", prediction=prediction)
+        prediction = classes[class_index]
+        confidence = round(np.max(pred) * 100, 2)
 
-# lancer le serveur
-app.run(debug=True)
+    return render_template("index.html",
+                           prediction=prediction,
+                           confidence=confidence,
+                           image_path=image_path)
+
+if __name__ == "__main__":
+    app.run(debug=True)
