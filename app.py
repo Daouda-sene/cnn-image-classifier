@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 classes = ["buildings", "forest", "glacier", "mountain", "sea", "street"]
 
-# ✅ Charger les bons modèles (.keras)
+# Charger modèles
 models = {
     "model1": tf.keras.models.load_model("model1.keras"),
     "model2": tf.keras.models.load_model("model2.keras")
@@ -29,8 +29,9 @@ def index():
         image_path = "static/test.jpg"
         file.save(image_path)
 
-        img = Image.open(image_path).resize((150,150))
-        img = np.array(img)/255.0
+        # 🔥 CORRECTION ICI
+        img = Image.open(image_path).convert("RGB").resize((150,150))
+        img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
         pred = model.predict(img)

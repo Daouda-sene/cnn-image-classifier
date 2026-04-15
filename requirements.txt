@@ -1,7 +1,4 @@
-flask
-gunicorn
+tensorflow
+gradio
 pillow
 numpy<2
-opencv-python
-torch==2.11.0
-torchvision==0.26.0
