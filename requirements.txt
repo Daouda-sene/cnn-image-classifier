@@ -1,4 +1,5 @@
-tensorflow
+torch
+torchvision
 gradio
 pillow
 numpy<2
