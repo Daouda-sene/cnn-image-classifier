@@ -68,9 +68,13 @@ with gr.Blocks(
         primary_hue="blue",
         secondary_hue="purple"
     ),
-    css="""
-.gradio-container {
+   css="""
+html, body {
     background: linear-gradient(to right, #1e3c72, #2a5298) !important;
+}
+
+.gradio-container {
+    background: transparent !important;
     color: white;
 }
 
