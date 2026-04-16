@@ -4,9 +4,10 @@ from PIL import Image
 import torchvision.transforms as transforms
 import gradio as gr
 
+# classes
 classes = ["buildings", "forest", "glacier", "mountain", "sea", "street"]
 
-# 🔥 RECONSTRUIRE LE MODELE (IMPORTANT)
+# 🔥 MODELE
 class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
@@ -32,7 +33,7 @@ class CNNModel(nn.Module):
         x = self.fc(x)
         return x
 
-# 🔥 Charger correctement
+# 🔥 CHARGEMENT
 model = CNNModel()
 model.load_state_dict(torch.load("daouda_model.pth", map_location="cpu"))
 model.eval()
@@ -43,17 +44,61 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
+# 🔥 PREDICTION
 def predict(image):
     if image is None:
-        return "No image"
+        return "❌ No image", {}
 
     image = image.convert("RGB")
     image = transform(image).unsqueeze(0)
 
     with torch.no_grad():
         outputs = model(image)
-        _, predicted = torch.max(outputs, 1)
+        probs = torch.softmax(outputs, dim=1)[0]
 
-    return classes[predicted.item()]
+    top_class = classes[torch.argmax(probs).item()]
+    confidences = {classes[i]: float(probs[i]) for i in range(len(classes))}
 
-gr.Interface(fn=predict, inputs=gr.Image(type="pil"), outputs="label").launch()
+    return f"✅ Prediction: {top_class}", confidences
+
+
+# 🎨 UI AVEC FOND BLEU
+with gr.Blocks(
+    theme=gr.themes.Soft(
+        primary_hue="blue",
+        secondary_hue="purple"
+    ),
+    css="""
+.gradio-container {
+    background: linear-gradient(to right, #1e3c72, #2a5298) !important;
+    color: white;
+}
+
+.gr-button {
+    background-color: #ff7a18 !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+footer {
+    display: none !important;
+}
+"""
+) as demo:
+
+    gr.Markdown("# 🌍 Image Classifier")
+    gr.Markdown("Upload une image pour prédire la catégorie")
+
+    with gr.Row():
+        with gr.Column():
+            image_input = gr.Image(type="pil", label="📷 Image")
+            btn = gr.Button("🚀 Prédire")
+
+        with gr.Column():
+            output_text = gr.Textbox(label="Résultat")
+            output_label = gr.Label(label="Probabilités")
+
+    btn.click(fn=predict, inputs=image_input, outputs=[output_text, output_label])
+
+# lancer
+demo.launch()
